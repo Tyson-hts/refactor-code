@@ -18,18 +18,9 @@ public class PersonalTaskManagerViolations {
     private static final String DB_FILE_PATH = "tasks_database.json";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    // Phương thức trợ giúp để tải dữ liệu (sẽ được gọi lặp lại)
-    private static JSONArray loadTasksFromDb() {
-        JSONParser parser = new JSONParser();
-        try (FileReader reader = new FileReader(DB_FILE_PATH)) {
-            Object obj = parser.parse(reader);
-            if (obj instanceof JSONArray) {
-                return (JSONArray) obj;
-            }
-        } catch (IOException | ParseException e) {
-            System.err.println("Lỗi khi đọc file database: " + e.getMessage());
-        }
-        return new JSONArray();
+// refactor: tách hàm kiểm tra mức độ ưu tiên
+    private boolean isValidPriority(String priorityLevel) {
+        return priorityLevel.equals("Thấp") || priorityLevel.equals("Trung bình") || priorityLevel.equals("Cao");
     }
 
     // Phương thức trợ giúp để lưu dữ liệu
