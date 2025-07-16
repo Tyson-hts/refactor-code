@@ -80,20 +80,29 @@ private boolean isValidPriority(String priorityLevel) {
     System.out.println("Lỗi: Mức độ ưu tiên không hợp lệ. Vui lòng chọn từ: Thấp, Trung bình, Cao.");
     return null;
 }
+        // refactor: tách kiểm tra trùng nhiệm vụ
+private boolean isDuplicateTask(JSONArray tasks, String title, String dueDateStr) {
+    for (Object obj : tasks) {
+        JSONObject existingTask = (JSONObject) obj;
+        if (existingTask.get("title").toString().equalsIgnoreCase(title) &&
+            existingTask.get("due_date").toString().equals(dueDateStr)) {
+            return true;
+        }
+    }
+    return false;
+}
 //----------------------------------------------------------------------//
         // Tải dữ liệu
         JSONArray tasks = loadTasksFromDb();
 
         // Kiểm tra trùng lặp
-        for (Object obj : tasks) {
-            JSONObject existingTask = (JSONObject) obj;
-            if (existingTask.get("title").toString().equalsIgnoreCase(title) &&
-                existingTask.get("due_date").toString().equals(dueDate.format(DATE_FORMATTER))) {
-                System.out.println(String.format("Lỗi: Nhiệm vụ '%s' đã tồn tại với cùng ngày đến hạn.", title));
-                return null;
-            }
-        }
+        if (isDuplicateTask(tasks, title, dueDateStr)) {
+    System.out.println(String.format("Lỗi: Nhiệm vụ '%s' đã tồn tại với cùng ngày đến hạn.", title));
+    return null;
+}
 
+//----------------------------------------------------------------------//
+        
         String taskId = UUID.randomUUID().toString(); // YAGNI: Có thể dùng số nguyên tăng dần đơn giản hơn.
 
         JSONObject newTask = new JSONObject();
