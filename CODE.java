@@ -56,7 +56,6 @@ public class PersonalTaskManagerViolations {
         return true;
     }
 
-    //----------------------------------------------------------------------//
     private static JSONArray loadTasksFromDb() {
         JSONParser parser = new JSONParser();
         try (FileReader reader = new FileReader(DB_FILE_PATH)) {
@@ -86,16 +85,13 @@ public class PersonalTaskManagerViolations {
                                                String dueDateStr, String priorityLevel,
                                                boolean isRecurring) {
 
-        // thêm gọi validateInputs
         if (!validateInputs(title, dueDateStr, priorityLevel)) {
             return null;
         }
 
-        // thêm: parse lại do đã validate trước đó
         LocalDate dueDate = LocalDate.parse(dueDateStr, DATE_FORMATTER);
         JSONArray tasks = loadTasksFromDb();
 
-        // gọi hàm kiểm tra trùng lặp mới
         if (isDuplicateTask(tasks, title, dueDateStr)) {
             System.out.println(String.format("Lỗi: Nhiệm vụ '%s' đã tồn tại với cùng ngày đến hạn.", title));
             return null;
@@ -113,11 +109,8 @@ public class PersonalTaskManagerViolations {
         newTask.put("created_at", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         newTask.put("last_updated_at", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
 
-        // chưa xoá is_recurring tại bước này
-        newTask.put("is_recurring", isRecurring);
-        if (isRecurring) {
-            newTask.put("recurrence_pattern", "Chưa xác định");
-        }
+        /// xóa: newTask.put("is_recurring", isRecurring);
+        /// xóa: if (isRecurring) { newTask.put("recurrence_pattern", "Chưa xác định"); }
 
         tasks.add(newTask);
         saveTasksToDb(tasks);
