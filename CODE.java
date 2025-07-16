@@ -16,12 +16,10 @@ public class PersonalTaskManagerViolations {
     private static final String DB_FILE_PATH = "tasks_database.json";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    // refactor: tách hàm kiểm tra mức độ ưu tiên
     private boolean isValidPriority(String priorityLevel) {
         return priorityLevel.equals("Thấp") || priorityLevel.equals("Trung bình") || priorityLevel.equals("Cao");
     }
 
-    // refactor: tách kiểm tra trùng nhiệm vụ
     private boolean isDuplicateTask(JSONArray tasks, String title, String dueDateStr) {
         for (Object obj : tasks) {
             JSONObject existingTask = (JSONObject) obj;
@@ -33,7 +31,6 @@ public class PersonalTaskManagerViolations {
         return false;
     }
 
-    // refactor: gom kiểm tra đầu vào
     private boolean validateInputs(String title, String dueDateStr, String priorityLevel) {
         if (title == null || title.trim().isEmpty()) {
             System.out.println("Lỗi: Tiêu đề không được để trống.");
@@ -78,9 +75,6 @@ public class PersonalTaskManagerViolations {
         }
     }
 
-    /**
-     * refactor: làm gọn hàm chính bằng cách gọi các hàm phụ trợ
-     */
     public JSONObject addNewTaskWithViolations(String title, String description,
                                                String dueDateStr, String priorityLevel,
                                                boolean isRecurring) {
@@ -103,7 +97,6 @@ public class PersonalTaskManagerViolations {
         return task;
     }
 
-    // thêm mới: tạo hàm riêng để khởi tạo JSONObject nhiệm vụ
     private JSONObject createTaskObject(String title, String description, LocalDate dueDate, String priorityLevel) {
         JSONObject newTask = new JSONObject();
         newTask.put("id", UUID.randomUUID().toString());
@@ -119,40 +112,23 @@ public class PersonalTaskManagerViolations {
 
     public static void main(String[] args) {
         PersonalTaskManagerViolations manager = new PersonalTaskManagerViolations();
-        System.out.println("\nThêm nhiệm vụ hợp lệ:");
-        manager.addNewTaskWithViolations(
-            "Mua sách",
-            "Sách Công nghệ phần mềm.",
-            "2025-07-20",
-            "Cao",
-            false
-        );
 
-        System.out.println("\nThêm nhiệm vụ trùng lặp (minh họa DRY - lặp lại code đọc/ghi DB và kiểm tra trùng):");
-        manager.addNewTaskWithViolations(
-            "Mua sách",
-            "Sách Công nghệ phần mềm.",
-            "2025-07-20",
-            "Cao",
-            false
-        );
+        System.out.println("\n✅ Thêm nhiệm vụ hợp lệ:");
+        manager.addNewTaskWithViolations("Mua sách", "Sách Công nghệ phần mềm.", "2025-07-20", "Cao", false);
 
-        System.out.println("\nThêm nhiệm vụ lặp lại (minh họa YAGNI - thêm tính năng không cần thiết ngay):");
-        manager.addNewTaskWithViolations(
-            "Tập thể dục",
-            "Tập gym 1 tiếng.",
-            "2025-07-21",
-            "Trung bình",
-            true 
-        );
+        System.out.println("\n⚠️ Thêm nhiệm vụ trùng lặp:");
+        manager.addNewTaskWithViolations("Mua sách", "Sách Công nghệ phần mềm.", "2025-07-20", "Cao", false);
 
-        System.out.println("\nThêm nhiệm vụ với tiêu đề rỗng:");
-        manager.addNewTaskWithViolations(
-            "",
-            "Nhiệm vụ không có tiêu đề.",
-            "2025-07-22",
-            "Thấp",
-            false
-        );
+        System.out.println("\n✅ Thêm nhiệm vụ hợp lệ khác:");
+        manager.addNewTaskWithViolations("Tập thể dục", "Tập gym 1 tiếng.", "2025-07-21", "Trung bình", true);
+
+        System.out.println("\n❌ Thêm nhiệm vụ không có tiêu đề:");
+        manager.addNewTaskWithViolations("", "Không có tiêu đề.", "2025-07-22", "Thấp", false);
+
+        System.out.println("\n❌ Thêm nhiệm vụ sai định dạng ngày:");
+        manager.addNewTaskWithViolations("Nấu ăn", "Nấu bữa tối.", "22-07-2025", "Cao", false);
+
+        System.out.println("\n❌ Thêm nhiệm vụ sai mức ưu tiên:");
+        manager.addNewTaskWithViolations("Học bài", "Ôn thi giữa kỳ.", "2025-07-23", "Rất cao", false);
     }
 }
