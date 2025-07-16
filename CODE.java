@@ -18,9 +18,23 @@ public class PersonalTaskManagerViolations {
     private static final String DB_FILE_PATH = "tasks_database.json";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-// refactor: tách hàm kiểm tra mức độ ưu tiên
-    private boolean isValidPriority(String priorityLevel) {
-        return priorityLevel.equals("Thấp") || priorityLevel.equals("Trung bình") || priorityLevel.equals("Cao");
+    // refactor: tách hàm kiểm tra mức độ ưu tiên
+private boolean isValidPriority(String priorityLevel) {
+    return priorityLevel.equals("Thấp") || priorityLevel.equals("Trung bình") || priorityLevel.equals("Cao");
+}
+//----------------------------------------------------------------------//
+    // Phương thức trợ giúp để tải dữ liệu (sẽ được gọi lặp lại)
+    private static JSONArray loadTasksFromDb() {
+        JSONParser parser = new JSONParser();
+        try (FileReader reader = new FileReader(DB_FILE_PATH)) {
+            Object obj = parser.parse(reader);
+            if (obj instanceof JSONArray) {
+                return (JSONArray) obj;
+            }
+        } catch (IOException | ParseException e) {
+            System.err.println("Lỗi khi đọc file database: " + e.getMessage());
+        }
+        return new JSONArray();
     }
 
     // Phương thức trợ giúp để lưu dữ liệu
@@ -62,19 +76,11 @@ public class PersonalTaskManagerViolations {
             System.out.println("Lỗi: Ngày đến hạn không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD.");
             return null;
         }
-        String[] validPriorities = {"Thấp", "Trung bình", "Cao"};
-        boolean isValidPriority = false;
-        for (String validP : validPriorities) {
-            if (validP.equals(priorityLevel)) {
-                isValidPriority = true;
-                break;
-            }
-        }
-        if (!isValidPriority) {
-            System.out.println("Lỗi: Mức độ ưu tiên không hợp lệ. Vui lòng chọn từ: Thấp, Trung bình, Cao.");
-            return null;
-        }
-
+        if (!isValidPriority(priorityLevel)) {
+    System.out.println("Lỗi: Mức độ ưu tiên không hợp lệ. Vui lòng chọn từ: Thấp, Trung bình, Cao.");
+    return null;
+}
+//----------------------------------------------------------------------//
         // Tải dữ liệu
         JSONArray tasks = loadTasksFromDb();
 
