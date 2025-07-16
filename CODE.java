@@ -79,28 +79,34 @@ public class PersonalTaskManagerViolations {
     }
 
     /**
-     * Chức năng thêm nhiệm vụ mới
+     * refactor: làm gọn hàm chính bằng cách gọi các hàm phụ trợ
      */
     public JSONObject addNewTaskWithViolations(String title, String description,
                                                String dueDateStr, String priorityLevel,
                                                boolean isRecurring) {
 
-        if (!validateInputs(title, dueDateStr, priorityLevel)) {
-            return null;
-        }
+        if (!validateInputs(title, dueDateStr, priorityLevel)) return null;
 
         LocalDate dueDate = LocalDate.parse(dueDateStr, DATE_FORMATTER);
         JSONArray tasks = loadTasksFromDb();
 
         if (isDuplicateTask(tasks, title, dueDateStr)) {
-            System.out.println(String.format("Lỗi: Nhiệm vụ '%s' đã tồn tại với cùng ngày đến hạn.", title));
+            System.out.println("Lỗi: nhiệm vụ đã tồn tại.");
             return null;
         }
 
-        String taskId = UUID.randomUUID().toString();
+        JSONObject task = createTaskObject(title, description, dueDate, priorityLevel);
+        tasks.add(task);
+        saveTasksToDb(tasks);
 
+        System.out.println("Đã thêm nhiệm vụ thành công: " + task.get("id"));
+        return task;
+    }
+
+    // thêm mới: tạo hàm riêng để khởi tạo JSONObject nhiệm vụ
+    private JSONObject createTaskObject(String title, String description, LocalDate dueDate, String priorityLevel) {
         JSONObject newTask = new JSONObject();
-        newTask.put("id", taskId);
+        newTask.put("id", UUID.randomUUID().toString());
         newTask.put("title", title);
         newTask.put("description", description);
         newTask.put("due_date", dueDate.format(DATE_FORMATTER));
@@ -108,14 +114,6 @@ public class PersonalTaskManagerViolations {
         newTask.put("status", "Chưa hoàn thành");
         newTask.put("created_at", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         newTask.put("last_updated_at", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-
-        /// xóa: newTask.put("is_recurring", isRecurring);
-        /// xóa: if (isRecurring) { newTask.put("recurrence_pattern", "Chưa xác định"); }
-
-        tasks.add(newTask);
-        saveTasksToDb(tasks);
-
-        System.out.println(String.format("Đã thêm nhiệm vụ mới thành công với ID: %s", taskId));
         return newTask;
     }
 
